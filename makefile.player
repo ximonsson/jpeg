@@ -1,0 +1,21 @@
+include makefile.include
+include makefile.ffmpeg
+
+JPEGV 	= asm
+JPEGO	= $(BUILD)/$(JPEGV)/*.o
+
+EXTRAO  = huffman.o utils.o ui.o
+
+SRC     = play.c
+OBJ		= $(addprefix $(BUILD)/, $(EXTRAO)) $(addprefix $(BUILD)/player/, $(SRC:.c=.o))
+
+EXEC 	= $(BIN)/play
+FFPLAY  = $(BIN)/ffplay
+
+all: $(EXEC) $(FFPLAY)
+
+$(EXEC): $(OBJ)
+	$(CC) -o $@ $^ $(JPEGO) $(LDFLAGS)
+
+$(FFPLAY): $(addprefix $(BUILD)/, $(EXTRAO)) $(BUILD)/player/ffplay.o
+	$(CC) -o $@ $^ $(LDFLAGS)

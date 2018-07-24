@@ -1,0 +1,27 @@
+CC      = gcc
+
+CFLAGS  = -I./include \
+		  -Wall \
+		  -g3 \
+		  -DGL_GLEXT_PROTOTYPES \
+		  $(shell pkg-config sdl2 --cflags) \
+		  $(shell pkg-config SDL2_ttf --cflags)
+# CFLAGS += -std=gnu99
+
+LDFLAGS = -L./lib \
+		  -L/usr/lib/nvidia-340/ \
+		  -lGL \
+		  -lm \
+		  -lpthread \
+		  $(shell pkg-config sdl2 --libs) \
+		  $(shell pkg-config SDL2_ttf --libs) \
+
+SRC_DIR = src
+BUILD	= build
+
+BIN 	= bin
+
+# c source files
+$(BUILD)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -c -o $@ $<

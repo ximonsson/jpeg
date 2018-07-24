@@ -1,0 +1,68 @@
+include makefile.include
+
+CFLAGS += -DINTERACTIVE
+
+LDFLAGS += -lOpenCL \
+		   -lrt
+
+ASM		= nasm
+ASMFLAGS= -f elf64 -g
+
+SRC_DIR = src
+BUILD	= build
+
+SRC		= main.c ui.c huffman.c utils.c
+OBJ		= $(addprefix $(BUILD)/, $(SRC:.c=.o))
+
+STDSRC  = dct.c
+STDOBJ	= $(addprefix $(BUILD)/std/, $(STDSRC:.c=.o))
+
+ASMSRC	=
+ASMOBJ	= $(addprefix $(BUILD)/asm/, $(ASMSRC:.c=.o))
+ASMSRC_	= jpeg.asm
+ASMOBJ_	= $(addprefix $(BUILD)/asm/, $(ASMSRC_:.asm=_asm.o))
+
+HWSRC   = opencl.c opengl.c
+HWOBJ	= $(addprefix $(BUILD)/hw/, $(HWSRC:.c=.o))
+
+STDBIN  = $(BIN)/jpeg
+ASMBIN  = $(BIN)/jpeg_asm
+HWBIN   = $(BIN)/jpeg_hw
+
+# glsl or opencl hardware accelerated technology
+ifdef GLSL
+CFLAGS += -DJPEG_HW__USE_GLSL
+else
+CFLAGS += -DJPEG_HW__USE_OPENCL
+endif
+
+# opengl core or opengl es
+# ifdef OPENGL_ES
+CFLAGS += -D__OPENGL_ES__
+# endif
+
+ifdef MULTITHREAD
+CFLAGS += -DMULTITHREAD
+LDFLAGS += -lpthread
+SRC += thread_pool.c
+endif
+
+
+all: std asm hw
+
+std: $(BUILD)/std/jpeg.o $(OBJ) $(STDOBJ)
+	@mkdir -p $(BIN)
+	$(CC) -o $(STDBIN) $^ $(LDFLAGS)
+
+asm: $(BUILD)/asm/jpeg.o $(OBJ) $(ASMOBJ) $(ASMOBJ_)
+	@mkdir -p $(BIN)
+	$(CC) -o $(ASMBIN) $^ $(LDFLAGS)
+
+hw: $(BUILD)/hw/jpeg.o $(OBJ) $(HWOBJ)
+	@mkdir -p $(BIN)
+	$(CC) -o $(HWBIN) $^ $(LDFLAGS)
+
+# asm files
+$(BUILD)/%_asm.o: $(SRC_DIR)/%.asm
+	@mkdir -p $(@D)
+	$(ASM) $(ASMFLAGS) -o $@ $<

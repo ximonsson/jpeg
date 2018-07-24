@@ -1,0 +1,21 @@
+include makefile.include
+include makefile.ffmpeg
+
+JPEGV 	= asm
+JPEGO	= $(BUILD)/$(JPEGV)/*.o
+
+EXTRAO  = huffman.o utils.o ui.o
+
+SRC     = transcode.c
+OBJ		= $(addprefix $(BUILD)/, $(EXTRAO)) $(addprefix $(BUILD)/transcode/, $(SRC:.c=.o))
+
+EXEC 	= $(BIN)/transcode
+EXEC2   = $(BIN)/fftranscode
+
+all: $(EXEC) $(EXEC2)
+
+$(EXEC): $(OBJ)
+	$(CC) -o $@ $^ $(JPEGO) $(LDFLAGS)
+
+$(EXEC2): $(BUILD)/transcode/fftranscode.o $(addprefix $(BUILD)/, $(EXTRAO))
+	$(CC) -o $@ $^ $(JPEGO) $(LDFLAGS)

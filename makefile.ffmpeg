@@ -1,0 +1,15 @@
+ifdef COMPILED_FFMPEG
+PKG_CONFIG_PATH = lib/ffmpeg/lib/pkgconfig
+CFLAGS += -I./lib/ffmpeg/include
+LDFLAGS += -L./lib/ffmpeg/lib
+endif
+
+CFLAGS += $(shell pkg-config libavcodec --cflags)
+CFLAGS += $(shell pkg-config libavutil --cflags)
+CFLAGS += $(shell pkg-config libavformat --cflags)
+CFLAGS += $(shell pkg-config libswscale --cflags)
+
+LDFLAGS += $(shell pkg-config libavcodec --libs)
+LDFLAGS += $(shell pkg-config libavutil --libs)
+LDFLAGS += $(shell pkg-config libavformat --libs)
+LDFLAGS += $(shell pkg-config libswscale --libs)
